@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
@@ -42,8 +44,8 @@ public class LoginController {
      */
     @RequestMapping(value = "/doLogin")
     @ResponseBody
-    public RespBean doLogin(@Valid LoginVo loginVo){
-        return userService.doLogin(loginVo);
+    public RespBean doLogin(@Valid LoginVo loginVo, HttpServletRequest request, HttpServletResponse response){
+        return userService.doLogin(loginVo, request, response);
     }
 
 }

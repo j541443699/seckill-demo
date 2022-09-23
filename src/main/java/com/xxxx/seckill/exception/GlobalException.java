@@ -8,9 +8,8 @@ import lombok.NoArgsConstructor;
 /**
  * Date:2022/9/23 9:19
  * Author:jyq
- * Description:
+ * Description:全局异常
  */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
