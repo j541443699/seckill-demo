@@ -1,6 +1,7 @@
 package com.xxxx.seckill.controller;
 
 import com.xxxx.seckill.pojo.User;
+import com.xxxx.seckill.service.IGoodsService;
 import com.xxxx.seckill.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,14 +26,10 @@ public class GoodsController {
 
     @Autowired
     private IUserService userService;
+    @Autowired
+    private IGoodsService goodsService;
 
-    /**
-     * 跳转商品列表页
-     * @param session
-     * @param model
-     * @param ticket
-     * @return
-     */
+    // 跳转商品列表页
     @RequestMapping("/toList")
     // public String toList(HttpServletRequest request, HttpServletResponse response, Model model, @CookieValue("userTicket") String ticket) {
     public String toList(Model model, User user) {
@@ -45,6 +42,7 @@ public class GoodsController {
         //     return "login";
         // }
         model.addAttribute("user", user);
+        model.addAttribute("goodsList", goodsService.findGoodsVo());
         return "goodsList";
     }
 
