@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class RespBean {
     private long code;
     private String message;
-    private Object object;
+    private Object obj;
 
     /**
      * 功能描述: 成功返回结果
