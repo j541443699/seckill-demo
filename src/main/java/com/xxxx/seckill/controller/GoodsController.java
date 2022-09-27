@@ -44,6 +44,7 @@ public class GoodsController {
 
     // 跳转商品列表页
     // Windows优化前QPS：2358
+    //        缓存QPS：13940
     // Linux优化前QPS：320
     @RequestMapping(value = "/toList", produces = "text/html;charset=utf-8")
     @ResponseBody
