@@ -31,6 +31,9 @@ public class SecKillController {
     private IOrderService orderService;
 
     // 秒杀
+    // windows优化前QPS：2475
+    // linux优化前QPS：170
+    // 优化前：存在超卖问题
     @RequestMapping("/doSeckill")
     public String doSeckill(Model model, User user, Long goodsId) {
         if (user == null) {

@@ -70,7 +70,7 @@ public class UserUtil {
             co.setRequestMethod("POST");
             co.setDoOutput(true);
 
-            // 写入参数
+            // 写入参数，发起登录请求
             OutputStream out = co.getOutputStream();
             String params = "mobile=" + user.getId() + "&password=" + MD5Util.inputPassToFormPass("123456");
             out.write(params.getBytes());
