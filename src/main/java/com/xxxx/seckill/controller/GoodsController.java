@@ -33,6 +33,8 @@ public class GoodsController {
     private IGoodsService goodsService;
 
     // 跳转商品列表页
+    // Windows优化前QPS：2358
+    // Linux优化前QPS：320
     @RequestMapping("/toList")
     // public String toList(HttpServletRequest request, HttpServletResponse response, Model model, @CookieValue("userTicket") String ticket) {
     public String toList(Model model, User user) {
