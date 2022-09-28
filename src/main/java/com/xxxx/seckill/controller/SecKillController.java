@@ -8,11 +8,14 @@ import com.xxxx.seckill.service.IGoodsService;
 import com.xxxx.seckill.service.IOrderService;
 import com.xxxx.seckill.service.ISeckillOrderService;
 import com.xxxx.seckill.vo.GoodsVo;
+import com.xxxx.seckill.vo.RespBean;
 import com.xxxx.seckill.vo.RespBeanEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Date:2022/9/24 15:48
@@ -34,8 +37,8 @@ public class SecKillController {
     // windows优化前QPS：2475
     // linux优化前QPS：170
     // 优化前：存在超卖问题
-    @RequestMapping("/doSeckill")
-    public String doSeckill(Model model, User user, Long goodsId) {
+    @RequestMapping("/doSeckill2")
+    public String doSeckill2(Model model, User user, Long goodsId) {
         if (user == null) {
             return "login";
         }
@@ -59,5 +62,31 @@ public class SecKillController {
         return "orderDetail";
     }
 
-
+    // 秒杀
+    // windows优化前QPS：2475
+    // linux优化前QPS：170
+    // 优化前：存在超卖问题
+    @RequestMapping(value = "/doSeckill", method = RequestMethod.POST)
+    @ResponseBody
+    public RespBean doSeckill(Model model, User user, Long goodsId) {
+        if (user == null) {
+            return RespBean.error(RespBeanEnum.SESSION_ERROR);
+        }
+        model.addAttribute("user", user);
+        GoodsVo goods = goodsService.findGoodsVoByGoodsId(goodsId);
+        // 判断库存
+        if (goods.getStockCount() < 1) {
+            model.addAttribute("errmsg", RespBeanEnum.EMPTY_STOCK.getMessage());
+            return RespBean.error(RespBeanEnum.EMPTY_STOCK);
+        }
+        // 判断是否重复抢购
+        SeckillOrder seckillOrder = seckillOrderService.getOne(new QueryWrapper<SeckillOrder>().eq("user_id", user.getId()).eq("goods_id", goodsId));
+        if (seckillOrder != null) {
+            model.addAttribute("errmsg", RespBeanEnum.REPEAT_ERROR.getMessage());
+            return RespBean.error(RespBeanEnum.REPEAT_ERROR);
+        }
+        // 下订单
+        Order order = orderService.seckill(user, goods);
+        return RespBean.success(order);
+    }
 }
