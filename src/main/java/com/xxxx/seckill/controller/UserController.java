@@ -47,4 +47,18 @@ public class UserController {
     public void mq01() {
     	mqSender.send("Hello");
     }
+
+    // Direct模式
+    @RequestMapping("/mq/direct01")
+    @ResponseBody
+    public void mq02() {
+        mqSender.send01("Hello,Red");
+    }
+
+    // Direct模式
+    @RequestMapping("/mq/direct02")
+    @ResponseBody
+    public void mq03() {
+        mqSender.send01("Hello,Green");
+    }
 }

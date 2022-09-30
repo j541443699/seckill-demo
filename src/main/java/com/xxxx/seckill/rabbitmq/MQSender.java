@@ -22,4 +22,14 @@ public class MQSender {
         rabbitTemplate.convertAndSend("fanoutExchange", "", msg);
     }
 
+    public void send01(Object msg) {
+        log.info("发送red消息：" + msg);
+        rabbitTemplate.convertAndSend("directExchange", "queue.red", msg);
+    }
+
+    public void send02(Object msg) {
+        log.info("发送green消息：" + msg);
+        rabbitTemplate.convertAndSend("directExchange", "queue.green", msg);
+    }
+
 }
