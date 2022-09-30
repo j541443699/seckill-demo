@@ -32,4 +32,14 @@ public class MQSender {
         rabbitTemplate.convertAndSend("directExchange", "queue.green", msg);
     }
 
+    public void send03(Object msg) {
+        log.info("发送消息（QUEUE01接收）：" + msg);
+        rabbitTemplate.convertAndSend("topicExchange", "queue.red.message", msg);
+    }
+
+    public void send04(Object msg) {
+        log.info("发送消息（被两个queue接收）：" + msg);
+        rabbitTemplate.convertAndSend("topicExchange", "message.queue.green.abc", msg);
+    }
+
 }
