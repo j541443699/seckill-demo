@@ -34,59 +34,59 @@ public class UserController {
         return RespBean.success(user);
     }
 
-    // 测试发送RabbitMQ消息
-    @RequestMapping("/mq")
-    @ResponseBody
-    public void mq() {
-        mqSender.send("Hello");
-    }
-
-    // Fanout模式
-    @RequestMapping("/mq/fanout")
-    @ResponseBody
-    public void mq01() {
-    	mqSender.send("Hello");
-    }
-
-    // Direct模式
-    @RequestMapping("/mq/direct01")
-    @ResponseBody
-    public void mq02() {
-        mqSender.send01("Hello,Red");
-    }
-
-    // Direct模式
-    @RequestMapping("/mq/direct02")
-    @ResponseBody
-    public void mq03() {
-        mqSender.send02("Hello,Green");
-    }
-
-    // Topic模式
-    @RequestMapping("/mq/topic01")
-    @ResponseBody
-    public void mq04() {
-        mqSender.send03("Hello,Red");
-    }
-
-    // Topic模式
-    @RequestMapping("/mq/topic02")
-    @ResponseBody
-    public void mq05() {
-        mqSender.send04("Hello,Green");
-    }
-
-    // Headers模式
-    @RequestMapping("/mq/header01")
-    @ResponseBody
-    public void mq06() {
-        mqSender.send05("Hello,Header01");
-    }
-
-    // Headers模式
-    @RequestMapping("/mq/header02")
-    @ResponseBody
-    public void mq07() {
-        mqSender.send06("Hello,Header02");
-    }
+    // // 测试发送RabbitMQ消息
+    // @RequestMapping("/mq")
+    // @ResponseBody
+    // public void mq() {
+    //     mqSender.send("Hello");
+    // }
+    //
+    // // Fanout模式
+    // @RequestMapping("/mq/fanout")
+    // @ResponseBody
+    // public void mq01() {
+    // 	mqSender.send("Hello");
+    // }
+    //
+    // // Direct模式
+    // @RequestMapping("/mq/direct01")
+    // @ResponseBody
+    // public void mq02() {
+    //     mqSender.send01("Hello,Red");
+    // }
+    //
+    // // Direct模式
+    // @RequestMapping("/mq/direct02")
+    // @ResponseBody
+    // public void mq03() {
+    //     mqSender.send02("Hello,Green");
+    // }
+    //
+    // // Topic模式
+    // @RequestMapping("/mq/topic01")
+    // @ResponseBody
+    // public void mq04() {
+    //     mqSender.send03("Hello,Red");
+    // }
+    //
+    // // Topic模式
+    // @RequestMapping("/mq/topic02")
+    // @ResponseBody
+    // public void mq05() {
+    //     mqSender.send04("Hello,Green");
+    // }
+    //
+    // // Headers模式
+    // @RequestMapping("/mq/header01")
+    // @ResponseBody
+    // public void mq06() {
+    //     mqSender.send05("Hello,Header01");
+    // }
+    //
+    // // Headers模式
+    // @RequestMapping("/mq/header02")
+    // @ResponseBody
+    // public void mq07() {
+    //     mqSender.send06("Hello,Header02");
+    // }
 }

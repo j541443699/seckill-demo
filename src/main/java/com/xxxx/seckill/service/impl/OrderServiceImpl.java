@@ -18,6 +18,7 @@ import com.xxxx.seckill.vo.OrderDetailVo;
 import com.xxxx.seckill.vo.RespBeanEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +52,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Transactional
     @Override
     public Order seckill(User user, GoodsVo goods) {
+        ValueOperations valueOperations = redisTemplate.opsForValue();
         // 秒杀商品表减库存
         SeckillGoods seckillGoods = seckillGoodsService.getOne(new QueryWrapper<SeckillGoods>().eq("goods_id", goods.getId()));
         seckillGoods.setStockCount(seckillGoods.getStockCount() - 1);
@@ -59,8 +61,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //         seckillGoods.getStockCount()).eq("id", seckillGoods.getId()).gt("stock_count", 0));// 解决库存超卖问题，但无法解决订单和秒杀订单过多问题
         boolean result = seckillGoodsService.update(new UpdateWrapper<SeckillGoods>().setSql(
                 "stock_count = stock_count - 1").eq("goods_id", goods.getId()).gt("stock_count", 0));// 不仅解决掉库存超卖，还解决掉订单和秒杀订单过多问题
-        if (!result) {
-            return null;
+        if (seckillGoods.getStockCount() < 1) {
+            // 判断是否还有库存
+            valueOperations.set("isStockEmpty：" + goods.getId(), "0");
+            return null;// ?
         }
         // 生成订单
         Order order = new Order();
@@ -81,7 +85,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         seckillOrder.setOrderId(order.getId());
         seckillOrder.setGoodsId(goods.getId());
         seckillOrderService.save(seckillOrder);
-        redisTemplate.opsForValue().set("order:"+user.getId()+":"+goods.getId(), seckillOrder);// 秒杀订单信息存入缓存，方便判断是否重复抢购时进行查询
+        valueOperations.set("order:"+user.getId()+":"+goods.getId(), seckillOrder);// 秒杀订单信息存入缓存，方便判断是否重复抢购时进行查询
         return order;
     }
 
