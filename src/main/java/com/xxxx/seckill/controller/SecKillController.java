@@ -17,6 +17,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,8 @@ public class SecKillController implements InitializingBean {
     private RedisTemplate redisTemplate;
     @Autowired
     private MQSender mqSender;
+    @Autowired
+    private RedisScript<Long> script;
 
     private Map<Long, Boolean> EmptyStockMap = new HashMap<>();
 
@@ -86,6 +90,7 @@ public class SecKillController implements InitializingBean {
     // windows优化后QPS：3564（完成缓存和页面静态化的优化）
     // 优化后：解决超卖问题（库存超卖问题，订单、秒杀订单过多问题均得以解决）
     // windows二次优化后QPS：6599（完成接口优化，redis预减库存+内存标记减少redis访问+rabbitmq秒杀+客户端轮询秒杀结果）
+    // windows三次优化后QPS：6914（优化Redis预减库存，使用lua脚本）
     @RequestMapping(value = "/doSeckill", method = RequestMethod.POST)
     @ResponseBody
     public RespBean doSeckill(Model model, User user, Long goodsId) {
@@ -125,10 +130,12 @@ public class SecKillController implements InitializingBean {
             return RespBean.error(RespBeanEnum.EMPTY_STOCK);
         }
         // 预减库存
-        Long stock = valueOperations.decrement("seckillGoods:" + goodsId);
+        // Long stock = valueOperations.decrement("seckillGoods:" + goodsId);
+        Long stock = (Long) redisTemplate.execute(script, Collections.singletonList("seckillGoods:" + goodsId),
+                Collections.EMPTY_LIST);// 原子性操作
         if (stock < 0) {
             EmptyStockMap.put(goodsId, true);
-            valueOperations.increment("seckillGoods:" + goodsId);
+            // valueOperations.increment("seckillGoods:" + goodsId);// 注意使用stock.lua脚本后，这里要注释掉
             return RespBean.error(RespBeanEnum.EMPTY_STOCK);
         }
 
