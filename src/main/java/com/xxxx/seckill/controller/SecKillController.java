@@ -21,6 +21,7 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -91,9 +92,9 @@ public class SecKillController implements InitializingBean {
     // 优化后：解决超卖问题（库存超卖问题，订单、秒杀订单过多问题均得以解决）
     // windows二次优化后QPS：6599（完成接口优化，redis预减库存+内存标记减少redis访问+rabbitmq秒杀+客户端轮询秒杀结果）
     // windows三次优化后QPS：6914（优化Redis预减库存，使用lua脚本）
-    @RequestMapping(value = "/doSeckill", method = RequestMethod.POST)
+    @RequestMapping(value = "{path}/doSeckill", method = RequestMethod.POST)
     @ResponseBody
-    public RespBean doSeckill(Model model, User user, Long goodsId) {
+    public RespBean doSeckill(@PathVariable String path, User user, Long goodsId) {
         if (user == null) {
             return RespBean.error(RespBeanEnum.SESSION_ERROR);
         }
@@ -119,10 +120,14 @@ public class SecKillController implements InitializingBean {
          */
 
         ValueOperations valueOperations = redisTemplate.opsForValue();
+        boolean check = orderService.checkPath(user, goodsId, path);
+        if (!check) {
+            return RespBean.error(RespBeanEnum.REQUEST_ILLEGAL);
+        }
+
         // 判断是否重复抢购
         SeckillOrder seckillOrder = (SeckillOrder) redisTemplate.opsForValue().get("order:" + user.getId() + ":" + goodsId);
         if (seckillOrder != null) {
-            model.addAttribute("errmsg", RespBeanEnum.REPEAT_ERROR.getMessage());
             return RespBean.error(RespBeanEnum.REPEAT_ERROR);
         }
         // 内存标记，减少Redis的访问
@@ -159,6 +164,22 @@ public class SecKillController implements InitializingBean {
         }
         Long orderId = seckillOrderService.getResult(user, goodsId);
         return RespBean.success(orderId);
+    }
+
+    /**
+     * 获取秒杀地址
+     * @param user
+     * @param goodsId
+     * @return
+     */
+    @RequestMapping(value = "/path", method = RequestMethod.GET)
+    @ResponseBody
+    public RespBean getPath(User user, Long goodsId) {
+        if (user == null) {
+            return RespBean.error(RespBeanEnum.SESSION_ERROR);
+        }
+        String str = orderService.createPath(user, goodsId);
+        return RespBean.success(str);
     }
 
     // 系统初始化，把商品库存数量加载到Redis
